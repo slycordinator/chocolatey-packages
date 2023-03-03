@@ -2,6 +2,8 @@
 
 $toolsDir = Split-Path $MyInvocation.MyCommand.Definition
 
+. $toolsDir\helpers.ps1
+
 $packageArgs = @{
   packageName    = 'audacity'
   fileType       = 'exe'
@@ -17,6 +19,10 @@ Get-ChildItem "$toolsDir\*.$($packageArgs.fileType)" | ForEach-Object {
     Set-Content "$_.ignore"
   }
 }
+
+$pp = Get-PackageParameters
+$mergeTasks = Get-MergeTasks $pp
+$packageArgs.silentArgs += ' /MERGETASKS="{0}"' -f $mergeTasks
 
 $packageName = $packageArgs.packageName
 $installLocation = Get-AppInstallLocation $packageName
