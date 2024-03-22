@@ -1,11 +1,7 @@
 ﻿$toolsPath = Split-Path $MyInvocation.MyCommand.Definition
 . $toolsPath\helpers.ps1
 
-$version = '123.0.6312.58'
-if ($version -eq (Get-ChromeVersion)) {
-  Write-Host "Google Chrome $version is already installed."
-  return
-}
+$version = [version]'123.0.6312.58'
 
 $packageArgs = @{
   packageName            = 'googlechrome'
@@ -20,5 +16,11 @@ $packageArgs = @{
   validExitCodes         = @(0)
 }
 
-if (Get-Chrome32bitInstalled) { 'url64bit', 'checksum64', 'checksumType64' | ForEach-Object { $packageArgs.Remove($_) } }
-Install-ChocolateyPackage @packageArgs
+$installedVersion = Get-ChromeVersion
+
+if (($null -ne $installedVersion) -and ($version -le $installedVersion)) {
+  Write-Warning "Skipping installation because version $version or later is already installed."
+} else {
+  if (Get-Chrome32bitInstalled) { 'url64bit', 'checksum64', 'checksumType64' | ForEach-Object { $packageArgs.Remove($_) } }
+  Install-ChocolateyPackage @packageArgs
+}
